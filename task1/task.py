@@ -1,15 +1,14 @@
 import csv
 from typing import Tuple
-import argparse 
+import argparse
 
-def task(file: str, adress: Tuple[int, int]):
+def task(file: str, address: Tuple[int, int]):
   with open(file, 'r') as csvfile:
     reader = csv.reader(csvfile, delimiter=',')
     return list(reader)[address[0]][address[0] - 1]
 
-
 if __name__ == '__main__':
-  parser = argparser.ArgumentParse()
+  parser = argparse.ArgumentParser()
   
   parser.add_argument('filepath')
   parser.add_argument('-r', '--row', type=int)
