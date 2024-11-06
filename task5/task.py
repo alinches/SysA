@@ -2,12 +2,11 @@ import json
 import numpy as np
 
 def create_relation_matrix(ranking_json: str):
-    ranking_groups = [group if isinstance(group, list) else [group] for group in json.loads(ranking_json)]
+    renking_groups = [group if isinstance(group, list) else [group] for group in json.loads(ranking_json)]
     size = sum(len(group) for group in ranking_groups)
-
-    # Создание базовой матрицы отношений
+    #Создание базовой матрицы отношений
     relation_matrix = [[1] * size for _ in range(size)]
-
+    
     previous_elements = []
     for group in ranking_groups:
         for prev_elem in previous_elements:
@@ -18,9 +17,9 @@ def create_relation_matrix(ranking_json: str):
 
     return np.array(relation_matrix)
 
-def determine_clusters(relation_matrix, matrix_a, matrix_b):
+def determine_clisters(relation_matrix, matrix_a, matrix_b):
     clusters = {}
-
+    
     total_rows = len(relation_matrix)
     total_cols = len(relation_matrix[0])
     processed_rows = set()
@@ -42,7 +41,7 @@ def determine_clusters(relation_matrix, matrix_a, matrix_b):
         if not final_clusters:
             final_clusters.append(clusters[key])
             continue
-
+            
         for i, cluster in enumerate(final_clusters):
             sum_a_cluster = np.sum(matrix_a[cluster[0] - 1])
             sum_b_cluster = np.sum(matrix_b[cluster[0] - 1])
@@ -61,22 +60,8 @@ def determine_clusters(relation_matrix, matrix_a, matrix_b):
 
     return [cluster[0] if len(cluster) == 1 else cluster for cluster in final_clusters]
 
-def process_rankings(ranking_a, ranking_b):
-    matrix_a = create_relation_matrix(ranking_a)
-    matrix_b = create_relation_matrix(ranking_b)
+        
 
-    # Пересечение и объединение матриц
-    combined_matrix = np.multiply(matrix_a, matrix_b)
-    combined_transposed = np.multiply(np.transpose(matrix_a), np.transpose(matrix_b))
-    merged_matrix = np.maximum(combined_matrix, combined_transposed)
+    
 
-    # Определение кластеров
-    result_clusters = determine_clusters(merged_matrix, matrix_a, matrix_b)
-    return json.dumps(result_clusters)
-
-if __name__ == "__main__":
-    ranking_a = '[1,[2,3],4,[5,6,7],8,9,10]'
-    ranking_b = '[[1,2],[3,4,5],6,7,9,[8,10]]'
-    final_result = process_rankings(ranking_a, ranking_b)
-    print(final_result)
 
