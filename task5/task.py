@@ -60,7 +60,25 @@ def determine_clisters(relation_matrix, matrix_a, matrix_b):
 
     return [cluster[0] if len(cluster) == 1 else cluster for cluster in final_clusters]
 
-        
+def process_rankings(ranking_a, ranking_b):
+    matrix_a = create_relation_matrix(ranking_a)
+    matrix_b = create_relation_matrix(ranking_b)
+
+    # Пересечение и объединение матриц
+    combined_matrix = np.multiply(matrix_a, matrix_b)
+    combined_transposed = np.multiply(np.transpose(matrix_a), np.transpose(matrix_b))
+    merged_matrix = np.maximum(combined_matrix, combined_transposed)
+
+    # Определение кластеров
+    result_clusters = determine_clusters(merged_matrix, matrix_a, matrix_b)
+    return json.dumps(result_clusters)
+
+if __name__ == "__main__":
+      ranking_a = '[1,[2,3],4,[5,6,7],8,9,10]'
+    ranking_b = '[[1,2],[3,4,5],6,7,9,[8,10]]'
+    final_result = process_rankings(ranking_a, ranking_b)
+    print(final_result)
+  
 
     
 
