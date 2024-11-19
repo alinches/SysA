@@ -2,44 +2,67 @@ from collections import defaultdict
 from functools import reduce
 from math import log2
 
+def get_event_counts():
+    """Вычисление частот появления событий A, B и совместного AB"""
+    joint_counts = {}
+    sum_counts = {}
+    product_counts = {}
+    
+    for dice1 in range(1, 7):
+        for dice2 in range(1, 7):
+            dice_sum = dice1 + dice2
+            dice_product = dice1 * dice2
+            
+            joint_counts[(dice_sum, dice_product)] = joint_counts.get((dice_sum, dice_product), 0) + 1
+            sum_counts[dice_sum] = sum_counts.get(dice_sum, 0) + 1
+            product_counts[dice_product] = product_counts.get(dice_product, 0) + 1
 
-def calculate_counts():
-    counts_ab, counts_a, counts_b = defaultdict(int), defaultdict(int), defaultdict(int)
-    for i in range(1, 7):
-        for j in range(1, 7):
-            sum_val, prod_val = i + j, i * j
-            counts_ab[(sum_val, prod_val)] += 1
-            counts_a[sum_val] += 1
-            counts_b[prod_val] += 1
-    return counts_ab, counts_a, counts_b
+    return joint_counts, sum_counts, product_counts
+
+def convert_to_probabilities(counts, total_outcomes):
+    """Преобразование частот в вероятности"""
+    
+return {key: value / total_outcomes for key, value in counts.items()}
 
 
-def calculate_probability(mass: defaultdict) -> dict:
-    return {key: (value / 36) for key, value in mass.items()}
+def calculate_entropy(probabilities):
+    """Вычисление энтропии Шеннона."""
+    entropy = 0
+    for prob in probabilities.values():
+        if prob > 0:
+            entropy -= prob * log2(prob)
+    return entropy
 
 
-def calculate_entropy(mass: dict) -> float:
-    return reduce(lambda e, prob: e - prob * log2(prob), mass.values(), 0)
+def calculate_results():
+    total_outcomes = 36  # Общее количество исходов при броске двух кубиков
 
+    # Получение частот событий
+    joint_counts, sum_counts, product_counts = get_event_counts()
 
-def round_values(entropies: [float]) -> [float]:
-    return [round(e, 2) for e in entropies]
+    # Преобразование частот в вероятности
+    joint_probabilities = convert_to_probabilities(joint_counts, total_outcomes)
+    sum_probabilities = convert_to_probabilities(sum_counts, total_outcomes)
+    product_probabilities = convert_to_probabilities(product_counts, total_outcomes)
 
+    # Вычисление энтропий
+    entropy_joint = calculate_entropy(joint_probabilities)  
+    entropy_sum = calculate_entropy(sum_probabilities)      
+    entropy_product = calculate_entropy(product_probabilities)  
 
-def task() -> list:
-    counts_ab, counts_a, counts_b = calculate_counts()
-    probability_ab = calculate_probability(counts_ab)
-    probability_a = calculate_probability(counts_a)
-    probability_b = calculate_probability(counts_b)
+    # Условная энтропия и информация
+    conditional_entropy = entropy_joint - entropy_sum  
+    mutual_information = entropy_product - conditional_entropy  
 
-    entropy_ab = calculate_entropy(probability_ab)
-    entropy_a = calculate_entropy(probability_a)
-    entropy_b = calculate_entropy(probability_b)
+    # Возвращение округленных значений
+    return [
+        round(entropy_joint, 2),
+        round(entropy_sum, 2),
+        round(entropy_product, 2),
+        round(conditional_entropy, 2),
+        round(mutual_information, 2),
+    ]
 
-    entropy_b_given_a = entropy_ab - entropy_a
-    information_a_about_b = entropy_b - entropy_b_given_a
-
-    return round_values([entropy_ab, entropy_a, entropy_b, entropy_b_given_a, information_a_about_b])
 
 if __name__ == '__main__':
-    print(task())
+    print(calculate_results())
