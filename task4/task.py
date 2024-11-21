@@ -21,9 +21,7 @@ def get_event_counts():
 
 def convert_to_probabilities(counts, total_outcomes):
     """Преобразование частот в вероятности"""
-    
-return {key: value / total_outcomes for key, value in counts.items()}
-
+    return {key: value / total_outcomes for key, value in counts.items()}
 
 def calculate_entropy(probabilities):
     """Вычисление энтропии Шеннона."""
@@ -33,8 +31,8 @@ def calculate_entropy(probabilities):
             entropy -= prob * log2(prob)
     return entropy
 
-
-def calculate_results():
+def task():
+    """Основная функция для вычисления результатов"""
     total_outcomes = 36  # Общее количество исходов при броске двух кубиков
 
     # Получение частот событий
@@ -63,6 +61,5 @@ def calculate_results():
         round(mutual_information, 2),
     ]
 
-
 if __name__ == '__main__':
-    print(calculate_results())
+    print(task())
