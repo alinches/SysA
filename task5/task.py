@@ -2,9 +2,10 @@ import json
 import numpy as np
 
 def create_relation_matrix(ranking_json: str):
-    renking_groups = [group if isinstance(group, list) else [group] for group in json.loads(ranking_json)]
+    """Создает матрицу отношений из ранжирования."""
+    ranking_groups = [group if isinstance(group, list) else [group] for group in json.loads(ranking_json)]
     size = sum(len(group) for group in ranking_groups)
-    #Создание базовой матрицы отношений
+    # Создание базовой матрицы отношений
     relation_matrix = [[1] * size for _ in range(size)]
     
     previous_elements = []
@@ -17,11 +18,10 @@ def create_relation_matrix(ranking_json: str):
 
     return np.array(relation_matrix)
 
-def determine_clisters(relation_matrix, matrix_a, matrix_b):
+def determine_clusters(relation_matrix, matrix_a, matrix_b):
+    """Определяет кластеры на основе матрицы отношений."""
     clusters = {}
-    
     total_rows = len(relation_matrix)
-    total_cols = len(relation_matrix[0])
     processed_rows = set()
 
     # Объединение элементов в кластеры
@@ -30,7 +30,7 @@ def determine_clisters(relation_matrix, matrix_a, matrix_b):
             continue
         new_cluster = [row + 1]
         clusters[row + 1] = new_cluster
-        for col in range(row + 1, total_cols):
+        for col in range(row + 1, total_rows):
             if relation_matrix[row][col] == 0:
                 new_cluster.append(col + 1)
                 processed_rows.add(col + 1)
@@ -60,7 +60,11 @@ def determine_clisters(relation_matrix, matrix_a, matrix_b):
 
     return [cluster[0] if len(cluster) == 1 else cluster for cluster in final_clusters]
 
-def process_rankings(ranking_a, ranking_b):
+def task():
+    """Основная функция для обработки ранжирования."""
+    ranking_a = '[1,[2,3],4,[5,6,7],8,9,10]'
+    ranking_b = '[[1,2],[3,4,5],6,7,9,[8,10]]'
+
     matrix_a = create_relation_matrix(ranking_a)
     matrix_b = create_relation_matrix(ranking_b)
 
@@ -74,12 +78,5 @@ def process_rankings(ranking_a, ranking_b):
     return json.dumps(result_clusters)
 
 if __name__ == "__main__":
-      ranking_a = '[1,[2,3],4,[5,6,7],8,9,10]'
-    ranking_b = '[[1,2],[3,4,5],6,7,9,[8,10]]'
-    final_result = process_rankings(ranking_a, ranking_b)
-    print(final_result)
-  
-
-    
-
+    print(task())
 
