@@ -2,7 +2,6 @@ import json
 import numpy as np
 from collections import defaultdict
 
-
 def parse_reviews(review_str):
     return json.loads(review_str)
 
@@ -10,7 +9,7 @@ def parse_reviews(review_str):
 def create_template(args):
     template = defaultdict(int)
     reviews_count = 0
-
+    
     for el in json.loads(args[0]):
         if isinstance(el, list):
             for elem in el:
@@ -22,13 +21,12 @@ def create_template(args):
 
     return template, reviews_count
 
-
 def create_matrix(template, *reviews):
     matrix = []
     for reviews_str in reviews:
         reviews = parse_reviews(reviews_str)
         reviews_list = [0] * len(template)
-
+  
         for i, review in enumerate(reviews):
             if isinstance(review, list):
                 for elem in review:
@@ -39,7 +37,6 @@ def create_matrix(template, *reviews):
         matrix.append(reviews_list)
 
     return matrix
-
 
 def calculate(matrix, reviews_count, experts_count):
     sums = np.sum(np.array(matrix), axis=0)
