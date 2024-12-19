@@ -1,67 +1,72 @@
 from collections import defaultdict
 import csv
 
-def task(csv_str: str):
-  outgoing = defaultdict(list)
-  incoming = defaultdict(list)
-  
-  reader = csv.reader(csv_str.splitlines(), delimiter=',')
-  for line in reader:
-    if line:
-      source, target = line
-      outgoing[source].append(target)
-      incoming[target].append(source)
-      
-      if source not in incoming:
-        incoming[source] = []
-      if target not in outgoing:
-        outgoing[target] = []
 
+def main(var: str) -> str:
     
-    root = next(node for node in incoming if not incoming[node])
-    leaves = [node for node in outgoing if not outgoing[node]]
-
+    edges = []
+    for line in var.strip().split('\n'):
+        if line.strip():
+            parent_str, child_str = line.strip().split(',')
+            parent, child = int(parent_str), int(child_str)
+            edges.append((parent, child))
     
-    relationships = {
-        node: {
-            'r1': set(outgoing[node]),  
-            'r2': set(incoming[node]),  
-            'r3': set(),                
-            'r4': set(),                
-            'r5': set()                 
-        }
-        for node in incoming
-    }
-
+    nodes = set()
+    for p, c in edges:
+        nodes.add(p)
+        nodes.add(c)
+    nodes = sorted(nodes)
     
-    stack = [root]
-    while stack:
-        current = stack.pop()
-        for target in outgoing[current]:  
-            relationships[target]['r4'].update(relationships[current]['r2'])
-            relationships[target]['r4'].update(relationships[current]['r4'])
-            relationships[target]['r5'].update(relationships[current]['r1'] - {target})
-            stack.append(target)
-
+    children = {node: [] for node in nodes}
+    parent = {node: None for node in nodes}
+    for p, c in edges:
+        children[p].append(c)
+        parent[c] = p
     
-    stack = leaves[:]
-    while stack:
-        current = stack.pop()
-        for source in incoming[current]:  
-            relationships[source]['r3'].update(relationships[current]['r1'])
-            relationships[source]['r3'].update(relationships[current]['r3'])
-            if source not in stack:
-                stack.append(source)
-
+    def get_ancestors(n):
+        result = []
+        cur = parent[n]
+        while cur is not None:
+            result.append(cur)
+            cur = parent[cur]
+        return result
     
-    fields = ('r1', 'r2', 'r3', 'r4', 'r5')
-    csv_output = '\n'.join(
-        ','.join(str(len(relationships[node][field])) for field in fields)
-        for node in sorted(relationships)
-    ) + '\n'
+    def get_descendants(n):
+        result = []
+        def dfs(u):
+            for ch in children[u]:
+                result.append(ch)
+                dfs(ch)
+        dfs(n)
+        return result
+    
+    results = []
+    for n in nodes:
+        r1 = len(children[n])
+        r2 = 1 if parent[n] is not None else 0
+        desc = get_descendants(n)
+        r3 = len(desc) - len(children[n])
+        anc = get_ancestors(n)
+        if parent[n] is not None:
+            r4 = len(anc[1:]) if len(anc) > 1 else 0
+        else:
+            r4 = 0
+        if parent[n] is not None:
+            siblings = [x for x in children[parent[n]] if x != n]
+            r5 = len(siblings)
+        else:
+            r5 = 0
+        results.append([r1, r2, r3, r4, r5])
+    
+    output_lines = []
+    for row in results:
+        output_lines.append(",".join(str(x) for x in row))
+    
+    return "\n".join(output_lines)
 
-    return csv_output
 
-if __name__ == '__main__':
-    input_data = "1,2\n1,3\n3,4\n3,5\n"
-    print(task(input_data))
+if __name__ == "__main__":
+    var = "1,2\n1,3\n3,4\n3,5"
+    result = main(var)
+    print(result)
+
